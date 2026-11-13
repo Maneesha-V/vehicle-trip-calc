@@ -17,11 +17,6 @@ const UploadTripModal = ({ onClose }: { onClose: () => void }) => {
     dispatch(clearTripError());
   }, [dispatch]);
 
-  // useEffect(() => {
-  //   const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-  //   window.addEventListener("keydown", onKey);
-  //   return () => window.removeEventListener("keydown", onKey);
-  // }, [onClose]);
 
   const pickFile = (f?: File) => {
     if (!f) return;
@@ -37,13 +32,7 @@ const UploadTripModal = ({ onClose }: { onClose: () => void }) => {
     pickFile(e.dataTransfer.files[0]);
   };
 
-  // const handleSave = async () => {
-  //   if (!name.trim()) return setLocalError("Trip name is required");
-  //   if (!file) return setLocalError("Please choose a CSV file");
-  //   setLocalError(null);
-  //   const result = await dispatch(uploadTrip({ file, name: name.trim() }));
-  //   if (uploadTrip.fulfilled.match(result)) onClose();
-  // };
+
   const handleSave = async () => {
     if (!name.trim()) return setLocalError("Trip name is required");
     if (!file) return setLocalError("Please choose a CSV file");
@@ -51,7 +40,7 @@ const UploadTripModal = ({ onClose }: { onClose: () => void }) => {
     setLocalError(null);
 
     try {
-      const result = await dispatch(
+      await dispatch(
         uploadTrip({ file, name: name.trim() }),
       ).unwrap();
 
