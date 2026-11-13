@@ -2,14 +2,15 @@ import { injectable } from "inversify";
 import { BaseRepository } from "./base.repository";
 import { IUserRepository } from "./interfaces/IUserRepository";
 import { IUser, User } from "../models/user.model";
+import { Model } from "mongoose";
 
 @injectable()
 export class UserRepository
   extends BaseRepository<IUser>
   implements IUserRepository
 {
-  constructor() {
-    super(User);
+  constructor(model: Model<IUser>) {
+    super(model);
   }
   async findByEmail(
     email: string,

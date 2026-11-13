@@ -14,20 +14,37 @@ import { ITripController } from "../../controllers/interfaces/ITripController";
 import { TripController } from "../../controllers/trip.controller";
 import { GpsPointRepository } from "../../repositories/gpsPoint.repository";
 import { IGpsPointRepository } from "../../repositories/interfaces/IGpsPointRepository";
+import { User } from "../../models/user.model";
+import { Trip } from "../../models/trip.model";
+import { GpsPoint } from "../../models/gpsPoint.model";
 
 const container = new Container();
 
 // Repository
+// container
+//   .bind<IUserRepository>(TYPES.UserRepository)
+//   .to(UserRepository);
+// container
+//   .bind<ITripRepository>(TYPES.TripRepository)
+//   .to(TripRepository);
+// container
+//   .bind<IGpsPointRepository>(TYPES.GpsPointRepository)
+//   .to(GpsPointRepository);
 container
   .bind<IUserRepository>(TYPES.UserRepository)
-  .to(UserRepository);
+  .toDynamicValue(() => new UserRepository(User))
+  .inSingletonScope();
+
 container
   .bind<ITripRepository>(TYPES.TripRepository)
-  .to(TripRepository);
+  .toDynamicValue(() => new TripRepository(Trip))
+  .inSingletonScope();
+
 container
   .bind<IGpsPointRepository>(TYPES.GpsPointRepository)
-  .to(GpsPointRepository);
-
+  .toDynamicValue(() => new GpsPointRepository(GpsPoint))
+  .inSingletonScope();
+  
   // Service
 container
   .bind<IAuthService>(TYPES.AuthService)

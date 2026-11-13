@@ -3,6 +3,7 @@ import { BaseRepository } from "./base.repository";
 import { IGpsPointRepository } from "./interfaces/IGpsPointRepository";
 import { GpsPoint, IGpsPoint } from "../models/gpsPoint.model";
 import { CalculatedPoint } from "../types/trip.types";
+import { Model } from "mongoose";
 
 const BATCH_SIZE = 5000;
 
@@ -11,8 +12,8 @@ export class GpsPointRepository
   extends BaseRepository<IGpsPoint>
   implements IGpsPointRepository
 {
-  constructor() {
-    super(GpsPoint);
+  constructor( model: Model<IGpsPoint>) {
+    super(model);
   }
 
   async insertManyForTrip(tripId: string, userId: string, rows: CalculatedPoint[]): Promise<void> {

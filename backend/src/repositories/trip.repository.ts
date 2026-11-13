@@ -1,13 +1,13 @@
 import { injectable } from "inversify";
-import { Types } from "mongoose";
+import { Model, Types } from "mongoose";
 import { BaseRepository } from "./base.repository";
 import { ITripRepository } from "./interfaces/ITripRepository";
 import { ITrip, Trip } from "../models/trip.model";
 
 @injectable()
 export class TripRepository extends BaseRepository<ITrip> implements ITripRepository {
-  constructor() {
-    super(Trip);
+  constructor( model: Model<ITrip>) {
+    super(model);
   }
 
   async findByUser(userId: string): Promise<ITrip[]> {
