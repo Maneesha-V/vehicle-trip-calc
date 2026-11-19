@@ -4,6 +4,7 @@ import { TYPES } from "../config/inversify/types";
 import type { IAuthService } from "../services/interfaces/IAuthService";
 import type { IAuthController } from "./interfaces/IAuthController";
 import { ApiError } from "../utils/ApiError";
+import { STATUS_CODES } from "../utils/constantUtils";
 
 const REFRESH_COOKIE = "refreshToken";
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -38,13 +39,13 @@ export class AuthController implements IAuthController {
     try {
       const { name, email, password } = req.body ?? {};
       if (!isNonEmptyString(name) || !isNonEmptyString(email) || !isNonEmptyString(password)) {
-        throw new ApiError(400, "Name, email and password are required");
+        throw new ApiError(STATUS_CODES.BAD_REQUEST, "Name, email and password are required");
       }
 
       const { user, refreshToken } = await this.authService.register(name, email, password);
 
       this.setRefreshCookie(res, refreshToken);
-      res.status(201).json({
+      res.status(STATUS_CODES.CREATED).json({
         success: true,
         message: "User created successfully",
         data: user,
@@ -58,13 +59,13 @@ export class AuthController implements IAuthController {
     try {
       const { email, password } = req.body ?? {};
       if (!isNonEmptyString(email) || !isNonEmptyString(password)) {
-        throw new ApiError(400, "Email and password are required");
+        throw new ApiError(STATUS_CODES.BAD_REQUEST, "Email and password are required");
       }
 
       const { user, accessToken, refreshToken } = await this.authService.login(email, password);
 
       this.setRefreshCookie(res, refreshToken);
-      res.status(200).json({
+      res.status(STATUS_CODES.SUCCESS).json({
         success: true,
         message: "Login successful",
         data: { accessToken, user },
@@ -79,7 +80,7 @@ export class AuthController implements IAuthController {
       await this.authService.logout(this.getRefreshToken(req));
 
       res.clearCookie(REFRESH_COOKIE, baseCookieOptions);
-      res.status(200).json({
+      res.status(STATUS_CODES.SUCCESS).json({
         success: true,
         message: "Logged out successfully",
       });
@@ -94,7 +95,7 @@ export class AuthController implements IAuthController {
         this.getRefreshToken(req),
       );
 
-      res.status(200).json({
+      res.status(STATUS_CODES.SUCCESS).json({
         success: true,
         message: "Token refreshed successfully",
         data: { accessToken, user },

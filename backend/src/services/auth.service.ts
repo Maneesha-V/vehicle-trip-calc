@@ -8,6 +8,7 @@ import { IUser } from "../models/user.model";
 import { AuthResult, AuthTokens, RefreshResult } from "../types/user.types";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/jwt";
 import { UserMapper } from "../mappers/UserMapper";
+import { STATUS_CODES } from "../utils/constantUtils";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 6;
@@ -31,14 +32,14 @@ export class AuthService implements IAuthService {
     const cleanName = name.trim();
     const cleanEmail = email.trim().toLowerCase();
 
-    if (!cleanName) throw new ApiError(400, "Name is required");
-    if (!EMAIL_REGEX.test(cleanEmail)) throw new ApiError(400, "Invalid email address");
+    if (!cleanName) throw new ApiError(STATUS_CODES.BAD_REQUEST, "Name is required");
+    if (!EMAIL_REGEX.test(cleanEmail)) throw new ApiError(STATUS_CODES.BAD_REQUEST, "Invalid email address");
     if (password.length < MIN_PASSWORD_LENGTH) {
-      throw new ApiError(400, `Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
+      throw new ApiError(STATUS_CODES.BAD_REQUEST, `Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
     }
 
     const existingUser = await this.userRepository.findByEmail(cleanEmail);
-    if (existingUser) throw new ApiError(409, "Email already exists");
+    if (existingUser) throw new ApiError(STATUS_CODES.CONFLICT, "Email already exists");
 
     const user = await this.userRepository.create({
       name: cleanName,
@@ -58,7 +59,7 @@ export class AuthService implements IAuthService {
     const user = await this.userRepository.findByEmail(email.trim().toLowerCase(), true);
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new ApiError(401, "Invalid email or password");
+      throw new ApiError(STATUS_CODES.UNAUTHORIZED, "Invalid email or password");
     }
 
     const tokens = await this.issueTokens(user);
@@ -78,13 +79,13 @@ export class AuthService implements IAuthService {
   }
 
   async refreshToken(token?: string): Promise<RefreshResult> {
-    if (!token) throw new ApiError(401, "Refresh token missing");
+    if (!token) throw new ApiError(STATUS_CODES.UNAUTHORIZED, "Refresh token missing");
 
     const { userId } = verifyRefreshToken(token);
     const user = await this.userRepository.findById(userId);
 
     if (!user || user.refreshToken !== token) {
-      throw new ApiError(401, "Invalid refresh token");
+      throw new ApiError(STATUS_CODES.UNAUTHORIZED, "Invalid refresh token");
     }
 
     return {

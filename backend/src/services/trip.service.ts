@@ -14,6 +14,7 @@ import {
 import { ApiError } from "../utils/ApiError";
 import { parseGpsCsv } from "../utils/gpsCsvParser";
 import { calculateTrip } from "../utils/tripCalculator";
+import { STATUS_CODES } from "../utils/constantUtils";
 
 @injectable()
 export class TripService implements ITripService {
@@ -31,7 +32,7 @@ export class TripService implements ITripService {
     vehicleId,
   }: UploadInput): Promise<UploadTripResult> {
     if (!file)
-      throw new ApiError(400, "CSV file is required (form field name: file)");
+      throw new ApiError(STATUS_CODES.BAD_REQUEST, "CSV file is required (form field name: file)");
 
     const { points: rows, skippedRows } = parseGpsCsv(file.buffer);
     const { points, summary, stoppages, idlings, overspeeds } =
@@ -72,7 +73,7 @@ export class TripService implements ITripService {
     userId: string,
   ): Promise<{ trip: TripDetailDTO; points: GpsPointDTO[] }> {
     const trip = await this.tripRepository.findByIdAndUser(tripId, userId);
-    if (!trip) throw new ApiError(404, "Trip not found");
+    if (!trip) throw new ApiError(STATUS_CODES.NOT_FOUND, "Trip not found");
 
     const points = await this.gpsPointRepository.findByTrip(tripId, userId);
     return {
@@ -83,13 +84,13 @@ export class TripService implements ITripService {
 
   async getTripReport(tripId: string, userId: string): Promise<TripDTO> {
     const trip = await this.tripRepository.findByIdAndUser(tripId, userId);
-    if (!trip) throw new ApiError(404, "Trip not found");
+    if (!trip) throw new ApiError(STATUS_CODES.NOT_FOUND, "Trip not found");
     return TripMapper.mapTripDTO(trip);
   }
   
   async deleteTrip(tripId: string, userId: string): Promise<void> {
     const deleted = await this.tripRepository.deleteByIdAndUser(tripId, userId);
-    if (!deleted) throw new ApiError(404, "Trip not found");
+    if (!deleted) throw new ApiError(STATUS_CODES.NOT_FOUND, "Trip not found");
     await this.gpsPointRepository.deleteByTrip(tripId);
   }
 }

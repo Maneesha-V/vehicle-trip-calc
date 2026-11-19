@@ -3,6 +3,7 @@ import { inject, injectable } from "inversify";
 import { TYPES } from "../config/inversify/types";
 import type { ITripService } from "../services/interfaces/ITripService";
 import type { ITripController } from "./interfaces/ITripController";
+import { STATUS_CODES } from "../utils/constantUtils";
 
 @injectable()
 export class TripController implements ITripController {
@@ -18,7 +19,7 @@ export class TripController implements ITripController {
         name: req.body?.name,
         vehicleId: req.body?.vehicleId,
       });
-      res.status(201).json({ success: true, message: "Trip uploaded successfully", data: result });
+      res.status(STATUS_CODES.CREATED).json({ success: true, message: "Trip uploaded successfully", data: result });
     } catch (err) {
       next(err);
     }
@@ -27,7 +28,7 @@ export class TripController implements ITripController {
   list = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const trips = await this.tripService.getTrips(req.userId as string);
-      res.status(200).json({ success: true, data: trips });
+      res.status(STATUS_CODES.SUCCESS).json({ success: true, data: trips });
     } catch (err) {
       next(err);
     }
@@ -39,7 +40,7 @@ export class TripController implements ITripController {
         String(req.params.id),
         req.userId as string,
       );
-      res.status(200).json({ success: true, data });
+      res.status(STATUS_CODES.SUCCESS).json({ success: true, data });
     } catch (err) {
       next(err);
     }
@@ -48,7 +49,7 @@ export class TripController implements ITripController {
   remove = async (req: Request, res: Response, next: NextFunction) => {
     try {
       await this.tripService.deleteTrip(String(req.params.id), req.userId as string);
-      res.status(200).json({ success: true, message: "Trip deleted" });
+      res.status(STATUS_CODES.SUCCESS).json({ success: true, message: "Trip deleted" });
     } catch (err) {
       next(err);
     }
@@ -57,7 +58,7 @@ export class TripController implements ITripController {
   report = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await this.tripService.getTripReport(String(req.params.id), req.userId as string);
-    res.status(200).json({ success: true, data });
+    res.status(STATUS_CODES.SUCCESS).json({ success: true, data });
   } catch (err) {
     next(err);
   }

@@ -1,6 +1,7 @@
 import { parse as csvParse } from "csv-parse/sync";
 import { CsvParseResult, ParsedGpsRow } from "../types/trip.types";
 import { ApiError } from "./ApiError";
+import { STATUS_CODES } from "./constantUtils";
 
 const MIN_POINTS = 2;
 const TZ_SUFFIX = /(Z|[+-]\d{2}:?\d{2})$/i;
@@ -33,7 +34,7 @@ const parseRow = (cols: string[]): ParsedGpsRow | null => {
 
 export const parseGpsCsv = (buffer: Buffer): CsvParseResult => {
   const text = buffer.toString("utf-8").replace(/^\uFEFF/, "");
-  if (!text.trim()) throw new ApiError(400, "CSV file is empty");
+  if (!text.trim()) throw new ApiError(STATUS_CODES.BAD_REQUEST, "CSV file is empty");
 
   const firstLine = text.split(/\r?\n/, 1)[0];
   const delimiter = firstLine.includes("\t") ? "\t" : ",";
@@ -47,7 +48,7 @@ export const parseGpsCsv = (buffer: Buffer): CsvParseResult => {
       relax_column_count: true,
     });
   } catch {
-    throw new ApiError(400, "Unable to read CSV file. Check the format.");
+    throw new ApiError(STATUS_CODES.BAD_REQUEST, "Unable to read CSV file. Check the format.");
   }
 
   // if the first value of the first row isn't a number, it's a header
@@ -63,7 +64,7 @@ export const parseGpsCsv = (buffer: Buffer): CsvParseResult => {
   }
 
   if (points.length < MIN_POINTS) {
-    throw new ApiError(400, `CSV needs at least ${MIN_POINTS} valid GPS rows`);
+    throw new ApiError(STATUS_CODES.BAD_REQUEST, `CSV needs at least ${MIN_POINTS} valid GPS rows`);
   }
 
   points.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());

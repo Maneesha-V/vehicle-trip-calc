@@ -7,6 +7,7 @@ import {
   TripEvent,
 } from "../types/trip.types";
 import { ApiError } from "./ApiError";
+import { STATUS_CODES } from "./constantUtils";
 
 const OVERSPEED_KMH = 60;
 const MAX_PLAUSIBLE_KMH = 200; // faster than this between two points = GPS glitch
@@ -59,7 +60,7 @@ const toEvent = (points: CalculatedPoint[], startIndex: number, endIndex: number
 
 export const calculateTrip = (rows: ParsedGpsRow[]): CalculationResult => {
   const { clean, discarded } = removeNoise(rows);
-  if (clean.length < 2) throw new ApiError(400, "Not enough valid GPS points after cleaning");
+  if (clean.length < 2) throw new ApiError(STATUS_CODES.BAD_REQUEST, "Not enough valid GPS points after cleaning");
 
   const points: CalculatedPoint[] = clean.map((r) => ({ ...r, speed: 0, isOverspeed: false }));
   const last = points.length - 1;
